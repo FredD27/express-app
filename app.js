@@ -1,7 +1,11 @@
 const express = require("express");
 const app = express();
 
-const port = 5000;
+const welcome = (req, res) => {
+  res.send("Welcome to my favourite movie list");
+};
+
+app.get("/", welcome);
 
 const movies = [
   {
@@ -30,36 +34,24 @@ const movies = [
   },
 ];
 
-app.get("/", (req, res) => {
-  res.send("Welcome to my favorite movie list");
-});
+const getMovies = (req, res) => {
+  res.json(movies);
+};
 
-app.get("/api/movies", (req, res) => {
-  res.status(200).json(movies);
-});
+app.get("/api/movies", getMovies);
 
-app.get("/api/movies/:id", movieByIdHandler);
+const getMovieById = (req, res) => {
+  const id = parseInt(req.params.id);
 
-function movieByIdHandler(req, res) {
-  const movieId = parseInt(req.params.id);
-  let theMovie = null;
+  const movie = movies.find((movie) => movie.id === id);
 
-  for (let i = 0; i < movies.length; i++) {
-    if (movies[i].id === movieId) {
-      theMovie = movies[i];
-    }
-  }
-  if (theMovie) {
-    res.status(200).json(theMovie);
+  if (movie != null) {
+    res.json(movie);
   } else {
-    res.status(404).json("Not found");
+    res.sendStatus(404);
   }
-}
+};
 
-app.listen(port, (err) => {
-  if (err) {
-    console.error("Something bad happened");
-  } else {
-    console.log(`Server is listening on ${port}`);
-  }
-});
+app.get("/api/movies/:id", getMovieById);
+
+module.exports = app;
